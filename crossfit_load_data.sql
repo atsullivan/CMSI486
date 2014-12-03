@@ -40,8 +40,26 @@ CREATE TABLE IF NOT EXISTS Competition(
 
 INSERT INTO Competition (comp_name, comp_type, comp_score, comp_region) VALUES
 ('2014 CrossFit Games', 'Games', 5, 'Global'),
-('2014 Regionals', 'Regionals', 5, 'Central East'),
-('2014 Open', 'Open', 5, 'So Cal');
+('2014 Regionals CE', 'Regionals', 5, 'Central East'),
+('2014 Regionals MA', 'Regionals', 5, 'Mid Atlantic'),
+('2014 Regionals SC', 'Regionals', 5, 'So Cal'),
+('2014 Regionals EU', 'Regionals', 5, 'Europe'),
+('2014 Open SC', 'Open', 5, 'So Cal'),
+('2014 Open EU', 'Open', 5, 'Europe'),
+('2014 Open CE', 'Open', 5, 'Central East'),
+('2014 Open MA', 'Open', 5, 'Mid Atlantic'),
+('2013 CrossFit Games', 'Games', 5, 'Global'),
+('2013 Regionals EU', 'Regionals', 5, 'Europe'),
+('2013 Regionals MA', 'Regionals', 5, 'Mid Atlantic'),
+('2013 Regionals SC', 'Regionals', 5, 'So Cal'),
+('2013 Regionals CE', 'Regionals', 5, 'Central East'),
+('2013 Open SC', 'Open', 5, 'So Cal'),
+('2013 Open MA', 'Open', 5, 'Mid Atlantic'),
+('2013 Open EU', 'Open', 5, 'Europe'),
+('2013 Open CE', 'Open', 5, 'Central East')
+
+
+;
 -- 
 -- TABLE: Participation 
 --
@@ -54,12 +72,24 @@ CREATE TABLE IF NOT EXISTS Participation(
 
 INSERT INTO Participation( a_ID, comp_name) VALUES
 (1, '2014 CrossFit Games'),
+(1, '2014 Regionals MA'),
+(1, '2014 Open MA'),
 (2, '2014 CrossFit Games'),
+(2, '2014 Regionals CE'),
+(2, '2014 Open CE'),
 (3, '2014 CrossFit Games'),
+(3, '2014 Regionals SC'),
+(3, '2014 Open SC'),
 (4, '2014 CrossFit Games'),
+(4, '2014 Regionals EU'),
+(4, '2014 Open EU'),
 (5, '2014 CrossFit Games'),
-(5, '2014 Regionals'),
-(6, '2014 CrossFit Games');
+(5, '2014 Regionals CE'),
+(5, '2014 Open CE'),
+(6, '2014 CrossFit Games'),
+(6, '2014 Regionals MA'),
+(6, '2014 Open MA')
+;
 
 --
 -- Add foreign key constraint
@@ -75,7 +105,6 @@ ALTER TABLE Participation ADD CONSTRAINT participation_comp_name_FK
     REFERENCES Competition(comp_name)
 ;
 
-
 -- 
 -- TABLE: Accomplishment 
 --
@@ -89,8 +118,6 @@ CREATE TABLE IF NOT EXISTS Accomplishment(
 )ENGINE=INNODB
 ;
 
-
-
 INSERT INTO Accomplishment (a_ID, comp_name, workout_name, a_score) VALUES
 (1, '2014 CrossFit Games', 'Fran', '00:02:25'),
 (2, '2014 CrossFit Games', 'Fran', '00:02:13'),
@@ -98,7 +125,12 @@ INSERT INTO Accomplishment (a_ID, comp_name, workout_name, a_score) VALUES
 (4, '2014 CrossFit Games', 'Fran', '00:02:35'),
 (5, '2014 CrossFit Games', 'Fran', '00:02:24'),
 (6, '2014 CrossFit Games', 'Fran', '00:02:35'),
-(5, '2014 Regionals', 'Fran', '00:02:35');
+(1, '2014 Regionals MA', 'Grace', '00:01:51'),
+(2, '2014 Regionals CE', 'Grace', '00:01:11'),
+(3, '2014 Regionals SC', 'Grace', '00:01:37'),
+(4, '2014 Regionals EU', 'Grace', '00:01:35'),
+(5, '2014 Regionals CE', 'Grace', '00:01:39'),
+(6, '2014 Regionals MA', 'Grace', '00:01:45');
 
 -- 
 -- TABLE: Benchmark 
@@ -117,8 +149,6 @@ ALTER TABLE Accomplishment ADD CONSTRAINT accomplishment_comp_name_FK
     REFERENCES Participation(comp_name)
 ;
 
-
-
 CREATE TABLE IF NOT EXISTS Benchmark(
     a_ID       INT         NOT NULL,
     b_name     VARCHAR(16)    NOT NULL,
@@ -131,11 +161,19 @@ CREATE TABLE IF NOT EXISTS Benchmark(
 
 INSERT INTO Benchmark (a_ID, b_name, units, type, b_score) VALUES
 (1, 'Fran', 'seconds', 'time', '00:02:25'),
+(1, 'Grace', 'seconds', 'time', '00:01:51'),
 (2, 'Fran', 'seconds', 'time', '00:02:13'),
+(2, 'Grace', 'seconds', 'time', '00:01:11'),
 (3, 'Fran', 'seconds', 'time', '00:02:17'),
+(3, 'Grace', 'seconds', 'time', '00:01:37'),
 (4, 'Fran', 'seconds', 'time', '00:02:35'),
+(4, 'Grace', 'seconds', 'time', '00:01:35'),
 (5, 'Fran', 'seconds', 'time', '00:02:24'),
-(6, 'Fran', 'seconds', 'time', '00:02:35');
+(5, 'Grace', 'seconds', 'time', '00:01:39'),
+(5, 'Filthy 50', 'seconds', 'time', '00:17:18'),
+(5, 'Helen', 'seconds', 'time', '00:07:55'),
+(6, 'Fran', 'seconds', 'time', '00:02:35'),
+(6, 'Grace', 'seconds', 'time', '00:01:45');
 
 --
 -- Add foreign key constraint
@@ -145,9 +183,6 @@ ALTER TABLE Benchmark ADD CONSTRAINT benchmark_a_ID_FK
     FOREIGN KEY (a_ID)
     REFERENCES Athlete(a_ID)
 ;
-
-
-
 
 -- 
 -- TABLE: Feat 
@@ -164,9 +199,6 @@ INSERT INTO Feat (type, units) VALUES
 ('weight', 'lbs'),
 ('reps', 'reps'),
 ('total', 'points');
-
-
-
 
 -- 
 -- INDEX: Ref97 
@@ -207,3 +239,16 @@ CREATE VIEW userview AS
     	AND a.a_ID = b.a_ID
 ;
 
+DELIMITER $$
+CREATE TRIGGER bench_best BEFORE UPDATE 
+	ON Accomplishment FOR EACH ROW
+	BEGIN
+	UPDATE Benchmark
+	SET b_score = NEW.a_score
+	WHERE b_score > NEW.a_score
+		AND a_ID = NEW.a_ID
+		AND b_name = NEW.workout_name
+	;
+
+	END$$
+DELIMITER ;
